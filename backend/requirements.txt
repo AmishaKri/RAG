@@ -24,6 +24,8 @@ PyJWT
 pwdlib[argon2]
 email-validator
 python-multipart
+passlib[bcrypt]
+python-jose[cryptography]
 
 # =========================
 # AI / LLM
