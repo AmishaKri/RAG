@@ -36,7 +36,7 @@ class AuthService:
         }
 
         res = users.insert_one(new_user)
-        background_tasks.add_task(send_welcome_email, email_normalized, user_data.name)
+        # background_tasks.add_task(send_welcome_email, email_normalized, user_data.name)
 
         return UserResponse(
             id=str(res.inserted_id),
