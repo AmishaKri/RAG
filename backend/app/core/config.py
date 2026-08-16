@@ -2,8 +2,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     MONGODB_URL: str
-    DATABASE_NAME: str = "knowledgeforge_db"
-    SECRET_KEY: str = "supersecretjwtkey_123456789_fallback"
+    DATABASE_NAME: str = "knowledgeForge"
+    SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
