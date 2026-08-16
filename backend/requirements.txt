@@ -1,31 +1,12 @@
-# =========================
-# Web Framework
-# =========================
 fastapi
 uvicorn
-
-# =========================
-# Configuration & Validation
-# =========================
 pydantic
 pydantic-settings
 python-dotenv
 email-validator
-
-# =========================
-# Database (MongoDB)
-# =========================
 pymongo
-
-# =========================
-# Authentication & Security
-# =========================
 passlib[bcrypt]
 python-jose[cryptography]
 python-multipart
-
-# =========================
-# HTTP & File Handling
-# =========================
 httpx
 aiofiles

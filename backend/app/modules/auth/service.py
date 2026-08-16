@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status, BackgroundTasks
-from app.database import users
+from app.db.mongodb import users
 from app.schemas.user import (
     UserRegister,
     UserLogin,

@@ -1,21 +1,19 @@
 from fastapi import FastAPI
-# from fastapi.middleware.cors import CORSMiddleware
-from app.modules.auth.router import router as auth_router
-
-app = FastAPI() 
+from app.api.router import api_router
 
 
-# CORS setup (Frontend connect karne ke liye)
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
+app = FastAPI(
+    title="KnowledgeForge",
+    description="Scalable RAG Evaluation & Serving System",
+    version="1.0.0"
+) 
 
-# Auth Router include karein
-app.include_router(auth_router)
+app.include_router(api_router)
 
 @app.get("/")
 def home():
     return {"status": "running", "message": "Server is up and healthy"}
+
+@app.get("/health")
+def health():
+    return {"success": True, "message": "Server is healthy"}
