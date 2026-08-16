@@ -1,7 +1,6 @@
-# created by Copilot CLI runtime in VS Code - placeholder
-from passlib.context import CryptContext
-from jose import jwt, JWTError
 from datetime import datetime, timedelta, timezone
+from jose import JWTError, jwt
+from passlib.context import CryptContext
 from app.core.config import settings
 
 pwd_context = CryptContext(
@@ -18,24 +17,19 @@ def verify_pass(plain_pass: str, hashed_pass: str) -> bool:
 def create_access_token(data: dict) -> str:
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    
     to_encode.update({"exp": expire})
-    
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
-
 
 def create_password_reset_token(email: str) -> str:
     expire = datetime.now(timezone.utc) + timedelta(minutes=5)
-    to_encode = {"sub": email, "type": "reset_password", "exp":expire}
+    to_encode = {"sub": email, "type": "reset_password", "exp": expire}
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
-def verify_password_reset_token(toke: str) -> str | None:
+def verify_password_reset_token(token: str) -> str | None:
     try:
-        payload = jwt.encode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         if payload.get("type") != "reset_password":
             return None
         return payload.get("sub")
     except JWTError:
         return None
-
-
