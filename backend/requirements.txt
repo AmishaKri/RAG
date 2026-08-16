@@ -1,4 +1,3 @@
-# created by Copilot CLI runtime in VS Code - placeholder
 # =========================
 # Web Framework
 # =========================
@@ -11,75 +10,22 @@ uvicorn
 pydantic
 pydantic-settings
 python-dotenv
+email-validator
 
 # =========================
-# MongoDB
+# Database (MongoDB)
 # =========================
 pymongo
 
 # =========================
 # Authentication & Security
 # =========================
-PyJWT
-pwdlib[argon2]
-email-validator
-python-multipart
 passlib[bcrypt]
 python-jose[cryptography]
+python-multipart
 
 # =========================
-# AI / LLM
-# =========================
-google-genai
-langchain
-langchain-core
-langchain-google-genai
-langchain-qdrant
-
-# =========================
-# Embeddings / Vector Search
-# =========================
-qdrant-client
-sentence-transformers
-
-# =========================
-# Hybrid Search
-# =========================
-rank-bm25
-
-# =========================
-# Document Processing
-# =========================
-pypdf
-python-docx
-openpyxl
-python-pptx
-markdown
-
-# =========================
-# HTTP / Async
+# HTTP & File Handling
 # =========================
 httpx
 aiofiles
-
-# =========================
-# Redis
-# =========================
-redis
-
-# =========================
-# Evaluation
-# =========================
-ragas
-
-# =========================
-# Testing
-# =========================
-pytest
-pytest-asyncio
-httpx
-
-# =========================
-# Code Quality
-# =========================
-ruff
