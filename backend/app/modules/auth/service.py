@@ -15,34 +15,46 @@ from app.core.security import (
     verify_password_reset_token,
 )
 from app.services.email import send_welcome_email, send_password_reset_email
+from pymongo.errors import PyMongoError
 
 class AuthService:
     @staticmethod
     def register_user(user_data: UserRegister, background_tasks: BackgroundTasks) -> UserResponse:
-        email_normalized = user_data.email.lower()
+        try:
+            email_normalized = user_data.email.lower()
 
-        if users.find_one({"email": email_normalized}):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Email is already registered",
+            if users.find_one({"email": email_normalized}):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Email is already registered",
+                )
+
+            hashed_password = hash_pass(user_data.password)
+
+            new_user = {
+                "name": user_data.name,
+                "email": email_normalized,
+                "password_hash": hashed_password,
+            }
+
+            res = users.insert_one(new_user)
+            # background_tasks.add_task(send_welcome_email, email_normalized, user_data.name)
+
+            return UserResponse(
+                id=str(res.inserted_id),
+                name=new_user["name"],
+                email=new_user["email"],
             )
-
-        hashed_password = hash_pass(user_data.password)
-
-        new_user = {
-            "name": user_data.name,
-            "email": email_normalized,
-            "password_hash": hashed_password,
-        }
-
-        res = users.insert_one(new_user)
-        # background_tasks.add_task(send_welcome_email, email_normalized, user_data.name)
-
-        return UserResponse(
-            id=str(res.inserted_id),
-            name=new_user["name"],
-            email=new_user["email"],
-        )
+        except PyMongoError as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Database error: {str(e)}"
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Registration failed: {str(e)}"
+            )
 
     @staticmethod
     def login_user(user_data: UserLogin) -> dict:

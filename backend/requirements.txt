@@ -5,8 +5,10 @@ pydantic-settings
 python-dotenv
 email-validator
 pymongo
-passlib[bcrypt]
+bcrypt
 python-jose[cryptography]
 python-multipart
 httpx
 aiofiles
+pypdf
+python-docx
