@@ -8,6 +8,15 @@ db = client[settings.DATABASE_NAME]
 
 # Collections
 users = db["users"]
+workspaces = db["workspaces"]
+documents = db["documents"]
+document_chunks = db["document_chunks"]
+
+
+def get_database():
+    """Return the active MongoDB database instance."""
+    return db
+
 
 def check_database_connection():
     """Check whether MongoDB is reachable."""

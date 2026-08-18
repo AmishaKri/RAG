@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from app.api.router import api_router
+from app.db.indexes import create_indexes
 
 
 app = FastAPI(
@@ -9,6 +10,11 @@ app = FastAPI(
 ) 
 
 app.include_router(api_router)
+
+
+@app.on_event("startup")
+def on_startup():
+    create_indexes()
 
 @app.get("/")
 def home():

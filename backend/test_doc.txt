@@ -1,0 +1,7 @@
+This is a test document for the KnowledgeForge RAG system.
+
+It contains multiple paragraphs to verify that text extraction and chunking work correctly.
+
+The chunker should split this into chunks based on word count, with configurable overlap between chunks. This document is intentionally kept fairly short since it's just a smoke test for Phase 3 functionality: workspace creation, document upload, text extraction, and chunking into MongoDB.
+
+Company policy states that all employees must complete this test successfully before moving on to Phase 4, which will add embeddings and vector search on top of this chunked data.
