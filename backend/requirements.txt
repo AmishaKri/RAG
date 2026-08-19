@@ -59,6 +59,7 @@ markdown
 # =========================
 httpx
 aiofiles
+<<<<<<< Updated upstream
 
 # =========================
 # Redis
@@ -81,3 +82,10 @@ httpx
 # Code Quality
 # =========================
 ruff
+=======
+pypdf
+python-docx
+qdrant-client 
+fastembed
+groq
+>>>>>>> Stashed changes
