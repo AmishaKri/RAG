@@ -14,6 +14,12 @@ class Settings(BaseSettings):
     MAIL_PASSWORD: str = ""
     MAIL_FROM: str = ""
 
+    GROQ_API_KEY: str = ""
+    QDRANT_URL: str = "http://localhost:6333"
+    QDRANT_API_KEY: str = ""
+    QDRANT_COLLECTION_NAME: str = "knowledgeforge_chunks"
+    EMBEDDING_DIMENSION: int = 384  
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
