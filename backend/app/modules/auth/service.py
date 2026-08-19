@@ -87,6 +87,7 @@ class AuthService:
 
     @staticmethod
     def reset_password(data: ResetPasswordRequest) -> dict:
+
         email = verify_password_reset_token(data.token)
 
         if not email:

@@ -12,3 +12,6 @@ httpx
 aiofiles
 pypdf
 python-docx
+qdrant-client 
+fastembed
+groq
