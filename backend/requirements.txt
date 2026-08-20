@@ -16,3 +16,7 @@ qdrant-client
 fastembed
 groq
 langchain-groq
+redis 
+slowapi 
+structlog
+python-json-logger

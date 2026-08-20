@@ -1,17 +1,29 @@
 # created by Copilot CLI runtime in VS Code - placeholder
-from fastapi import APIRouter, status, BackgroundTasks, Depends
+from fastapi import APIRouter, status, BackgroundTasks, Depends, Request
 from app.schemas.user import UserRegister, UserResponse, UserLogin, ForgotPasswordRequest,ResetPasswordRequest
 from app.modules.auth.service import auth_service
 from app.core.security import get_current_user
+from app.core.rate_limit import limiter
+from typing import Any
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+def get_field(user: Any, field_name: str, fallback_field: str = None) -> Any:
+    """Safely extracts field from dict or Pydantic object."""
+    if isinstance(user, dict):
+        return user.get(field_name) or (user.get(fallback_field) if fallback_field else None)
+    val = getattr(user, field_name, None)
+    if val is None and fallback_field:
+        val = getattr(user, fallback_field, None)
+    return val
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register(user: UserRegister, background_tasks: BackgroundTasks):
     return auth_service.register_user(user, background_tasks)
 
 @router.post("/login")
-def login(user: UserLogin):
+@limiter.limit("5/minute")
+def login(request: Request, user: UserLogin):
     return auth_service.login_user(user)
 
 @router.post("/forgot-password")
