@@ -46,28 +46,52 @@ class VectorService:
             points=points
         )
 
-    def hybrid_search(self, query: str, workspace_id: str, top_k: int = 5) -> list[dict]:
+    def hybrid_search(
+        self,
+        query: str,
+        workspace_id: str,
+        owner_id: str,
+        top_k: int = 5,
+    ) -> list[dict]:
+
         dense_query_vec = generate_dense_embeddings([query])[0]
-        sparse_query_vec = list(generate_sparse_embeddings([query]))[0]
+
+        sparse_query_vec = list(
+            generate_sparse_embeddings([query])
+        )[0]
+
+        search_filter = models.Filter(
+            must=[
+                models.FieldCondition(
+                    key="workspace_id",
+                    match=models.MatchValue(
+                        value=workspace_id
+                    ),
+                ),
+                models.FieldCondition(
+                    key="owner_id",
+                    match=models.MatchValue(
+                        value=owner_id
+                    ),
+                ),
+            ]
+        )
 
         prefetch = [
             models.Prefetch(
                 query=dense_query_vec,
                 using="dense",
-                filter=models.Filter(
-                    must=[models.FieldCondition(key="workspace_id", match=models.MatchValue(value=workspace_id))]
-                ),
+                filter=search_filter,
                 limit=top_k * 2,
             ),
+
             models.Prefetch(
                 query=models.SparseVector(
                     indices=sparse_query_vec.indices.tolist(),
                     values=sparse_query_vec.values.tolist(),
                 ),
                 using="sparse",
-                filter=models.Filter(
-                    must=[models.FieldCondition(key="workspace_id", match=models.MatchValue(value=workspace_id))]
-                ),
+                filter=search_filter,
                 limit=top_k * 2,
             ),
         ]
@@ -75,20 +99,26 @@ class VectorService:
         results = qdrant_client.query_points(
             collection_name=self.collection_name,
             prefetch=prefetch,
-            query=models.FusionQuery(fusion=models.Fusion.RRF),
+            query=models.FusionQuery(
+                fusion=models.Fusion.RRF
+            ),
             limit=top_k,
         )
 
         output = []
+
         for point in results.points:
+
             output.append({
                 "chunk_id": point.payload.get("chunk_id"),
                 "document_id": point.payload.get("document_id"),
                 "workspace_id": point.payload.get("workspace_id"),
+                "owner_id": point.payload.get("owner_id"),
                 "text": point.payload.get("text"),
                 "chunk_index": point.payload.get("chunk_index"),
                 "score": point.score,
             })
+
         return output
 
     def delete_document_vectors(self, document_id: str):
