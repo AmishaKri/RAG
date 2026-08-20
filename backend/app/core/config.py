@@ -21,6 +21,15 @@ class Settings(BaseSettings):
     QDRANT_COLLECTION_NAME: str = "knowledgeforge_chunks"
     EMBEDDING_DIMENSION: int = 384  
 
+    # Redis Configuration
+    REDIS_URL: str = "redis://localhost:6379/0"
+    REDIS_ENABLED: bool = True
+    CACHE_DEFAULT_TTL: int = 300  
+    
+    # Rate Limiting
+    RATE_LIMIT_DEFAULT: str = "60/minute"
+    RATE_LIMIT_AUTH: str = "5/minute"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
