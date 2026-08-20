@@ -13,6 +13,7 @@ def search_hybrid(
     results = vector_service.hybrid_search(
         query=search_data.query,
         workspace_id=search_data.workspace_id,
+        owner_id=current_user["id"],
         top_k=search_data.top_k,
     )
     return results
