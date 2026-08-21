@@ -47,7 +47,7 @@ function FormattedText({ text }: { text: string }) {
         if (trimmed.startsWith('## ')) return <h2 key={i} className="mt-5 text-xl font-bold text-[var(--text)]">{formatInline(trimmed.slice(3))}</h2>;
         if (trimmed.startsWith('# ')) return <h1 key={i} className="mt-6 text-2xl font-bold text-[var(--text)]">{formatInline(trimmed.slice(2))}</h1>;
 
-        // Lists
+              // Lists
         const lines = trimmed.split('\n');
         if (lines.every((l) => /^[-*]\s/.test(l))) {
           return (
@@ -59,13 +59,67 @@ function FormattedText({ text }: { text: string }) {
           );
         }
 
-        return <p key={i} className="my-2 leading-relaxed text-[var(--text)]">{formatInline(trimmed)}</p>;
+              // Markdown table detection: header row + separator row like |---|---|
+              if (lines.length >= 2 && isMarkdownTable(lines)) {
+                const [headerLine, _sep, ...rowLines] = lines;
+                const headers = splitTableLine(headerLine);
+                const rows = rowLines.map((rl) => splitTableLine(rl));
+
+                return (
+                  <div key={i} className="my-4 overflow-x-auto">
+                    <table className="w-full table-auto border-collapse text-sm">
+                      <thead>
+                        <tr>
+                          {headers.map((h, hi) => (
+                            <th key={hi} className="border px-3 py-2 text-left font-medium text-[var(--text)]">{formatInline(h)}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {rows.map((r, ri) => (
+                          <tr key={ri} className={ri % 2 === 0 ? 'bg-[var(--surface-2)]' : ''}>
+                            {r.map((cell, ci) => (
+                              <td key={ci} className="border px-3 py-2 text-[var(--text-2)]">{formatInline(cell)}</td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                );
+              }
+
+              return <p key={i} className="my-2 leading-relaxed text-[var(--text)]">{formatInline(trimmed)}</p>;
       })}
     </>
   );
 }
 
+function isMarkdownTable(lines: string[]) {
+  // line 1: header with pipes
+  // line 2: separator containing only pipes, dashes, colons and spaces
+  const sepLine = lines[1] || '';
+  if (!/^[\s|:\-]+$/.test(sepLine)) return false;
+
+  // ensure header has at least one pipe or multiple columns
+  const header = lines[0] || '';
+  if (!header.includes('|')) return false;
+
+  return true;
+}
+
+function splitTableLine(line: string) {
+  // Split on pipes but ignore leading/trailing empty segments from leading/trailing pipes
+  const parts = line.split('|').map((s) => s.trim());
+  // If first or last are empty due to leading/trailing pipe, remove them
+  if (parts.length > 0 && parts[0] === '') parts.shift();
+  if (parts.length > 0 && parts[parts.length - 1] === '') parts.pop();
+  return parts;
+}
+
 function formatInline(text: string) {
+  // helper used by table rendering too
+
   // Bold
   const withBold = text.split(/(\*\*[\s\S]+?\*\*)/g).map((chunk, i) => {
     if (chunk.startsWith('**') && chunk.endsWith('**')) {
