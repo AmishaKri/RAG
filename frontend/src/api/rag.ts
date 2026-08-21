@@ -1,3 +1,31 @@
+const DOCUMENT_HINTS = [
+  'according to my resume',
+  'according to the uploaded',
+  'in the uploaded document',
+  'in my pdf',
+  'mentioned in my document',
+  'what does the document say',
+  'what is mentioned in',
+  'based on these documents',
+  'based on my documents',
+  'based on the uploaded documents',
+  'according to the document',
+  'according to my uploaded',
+  'resume',
+  'pdf',
+  'docx',
+  'document',
+  'uploaded file',
+  'upload',
+  'workspace',
+];
+
+function isDocumentSpecificQuestion(query: string): boolean {
+  const normalized = (query || '').trim().toLowerCase();
+  if (!normalized) return false;
+  return DOCUMENT_HINTS.some((hint) => normalized.includes(hint));
+}
+
 export async function* streamAnswer(workspaceId: string, query: string, signal?: AbortSignal, onCitations?: (citations: any[]) => void): AsyncGenerator<string> {
   const baseUrl = import.meta.env.VITE_API_URL || '';
   const token = localStorage.getItem('kf_access_token');
@@ -6,7 +34,12 @@ export async function* streamAnswer(workspaceId: string, query: string, signal?:
   };
   if (token) headers['Authorization'] = 'Bearer ' + token;
 
-  const res = await fetch(`${baseUrl || ''}/rag/ask`, {
+  // Decide whether to force general mode. If the question does not look document-specific,
+  // ask the backend to use general mode to allow normal/chit-chat answers.
+  const forceGeneral = !isDocumentSpecificQuestion(query);
+  const url = `${baseUrl || ''}/rag/ask${forceGeneral ? '?mode=general' : ''}`;
+
+  const res = await fetch(url, {
     method: 'POST',
     headers,
     body: JSON.stringify({ query, workspace_id: workspaceId }),
