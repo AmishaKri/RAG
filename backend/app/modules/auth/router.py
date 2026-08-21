@@ -1,6 +1,6 @@
 # created by Copilot CLI runtime in VS Code - placeholder
 from fastapi import APIRouter, status, BackgroundTasks, Depends, Request
-from app.schemas.user import UserRegister, UserResponse, UserLogin, ForgotPasswordRequest,ResetPasswordRequest
+from app.schemas.user import UserRegister, UserResponse, UserLogin, GoogleLoginRequest, ForgotPasswordRequest, ResetPasswordRequest
 from app.modules.auth.service import auth_service
 from app.core.security import get_current_user
 from app.core.rate_limit import limiter
@@ -33,6 +33,11 @@ def forgot_password(data: ForgotPasswordRequest, background_tasks: BackgroundTas
 @router.post("/reset-password")
 def reset_password(data: ResetPasswordRequest):
     return auth_service.reset_password(data)
+
+@router.post("/google")
+@limiter.limit("10/minute")
+def google_login(request: Request, data: GoogleLoginRequest):
+    return auth_service.google_login(data.token)
 
 @router.get("/me", response_model=UserResponse)
 def get_current_user_endpoint(current_user: dict = Depends(get_current_user)):
