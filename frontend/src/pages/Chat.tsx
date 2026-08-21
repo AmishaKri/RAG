@@ -19,7 +19,7 @@ import {
   useConversations,
   useCreateConversation,
   useAddMessage,
-  useSearch,
+  useMessages,
 } from '@/hooks/queries';
 import { streamAnswer } from '@/api/rag';
 import { useWorkspaceStore } from '@/store/workspaceStore';
@@ -28,7 +28,7 @@ import { Conversation, SearchResult } from '@/types';
 
 interface ChatMessage {
   id?: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   content: string;
   citations?: SearchResult[];
 }
@@ -39,20 +39,33 @@ export default function Chat() {
   const { data: conversations, isLoading: convsLoading } = useConversations(workspaceId);
   const createConversation = useCreateConversation();
   const addMessage = useAddMessage();
-  const search = useSearch(workspaceId);
 
   const [activeConv, setActiveConv] = useState<Conversation | null>(null);
+  const { data: historyMessages } = useMessages(activeConv?.id);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [thinking, setThinking] = useState(false);
   const [streaming, setStreaming] = useState(false);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
   const [sources, setSources] = useState<SearchResult[]>([]);
+  const sourcesRef = useRef<SearchResult[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, thinking, streaming]);
+
+  useEffect(() => {
+    if (!historyMessages) return;
+    setMessages(
+      historyMessages.map((msg) => ({
+        id: msg.id,
+        role: msg.role,
+        content: msg.content,
+        citations: (msg.citations ?? []) as unknown as SearchResult[],
+      }))
+    );
+  }, [historyMessages]);
 
   const handleNewChat = async () => {
     if (!workspaceId) return;
@@ -83,19 +96,24 @@ export default function Chat() {
         return;
       }
     }
+
     setActiveConv(conversation);
     setMessages((prev) => [...prev, { role: 'user', content: userText }]);
     setThinking(true);
 
     try {
-      const results = await search.mutateAsync({ query: userText });
-      setSources(results.slice(0, 4));
+      await addMessage.mutateAsync({ conversationId: conversation.id, content: userText, role: 'user' });
+
       setThinking(false);
       setStreaming(true);
 
       const controller = new AbortController();
       setAbortController(controller);
-      const generator = streamAnswer(workspaceId, userText, controller.signal);
+      const generator = streamAnswer(workspaceId, userText, controller.signal, (citations) => {
+        const top = (citations || []).slice(0, 4);
+        setSources(top);
+        sourcesRef.current = top;
+      });
 
       let answer = '';
       for await (const chunk of generator) {
@@ -105,16 +123,20 @@ export default function Chat() {
           const last = existing[existing.length - 1];
           if (last && last.role === 'assistant') {
             last.content = answer;
-            last.citations = results.slice(0, 4);
+            last.citations = sourcesRef.current;
             return [...existing];
           }
-          return [...prev, { role: 'assistant', content: answer, citations: results.slice(0, 4) }];
+          return [...prev, { role: 'assistant', content: answer, citations: sourcesRef.current }];
         });
       }
 
       setStreaming(false);
       setAbortController(null);
-      await addMessage.mutateAsync({ conversationId: conversation.id, content: answer });
+      await addMessage.mutateAsync({
+        conversationId: conversation.id,
+        content: answer,
+        role: 'assistant',
+      });
     } catch (err: any) {
       setThinking(false);
       setStreaming(false);
@@ -146,7 +168,7 @@ export default function Chat() {
             {conversations.map((conv) => (
               <button
                 key={conv.id}
-                onClick={() => { setActiveConv(conv); setMessages([]); setSources([]); }}
+                onClick={() => { setActiveConv(conv); setSources([]); }}
                 className={[
                   'w-full rounded-xl border px-4 py-3 text-left text-sm transition-all',
                   activeConv?.id === conv.id

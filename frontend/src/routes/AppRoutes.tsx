@@ -15,7 +15,6 @@ const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const Workspaces = lazy(() => import('@/pages/Workspaces'));
 const Workspace = lazy(() => import('@/pages/Workspace'));
 const Documents = lazy(() => import('@/pages/Documents'));
-const Search = lazy(() => import('@/pages/Search'));
 const Chat = lazy(() => import('@/pages/Chat'));
 const Analytics = lazy(() => import('@/pages/Analytics'));
 const Settings = lazy(() => import('@/pages/Settings'));
@@ -54,7 +53,6 @@ export default function AppRoutes() {
         <Route path="/workspace/:id" element={<Workspace />}>
           <Route index element={<WorkspaceOverview />} />
           <Route path="documents" element={<Documents />} />
-          <Route path="search" element={<Search />} />
           <Route path="chat" element={<Chat />} />
           <Route path="analytics" element={<Analytics />} />
         </Route>

@@ -1,9 +1,9 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
+﻿import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL || '';
 
 export const client = axios.create({
-  baseURL: API_URL,
+  baseURL: API_URL || '/',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -13,7 +13,7 @@ export const client = axios.create({
 client.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = localStorage.getItem('kf_access_token');
   if (token && config.headers) {
-    config.headers.Authorization = `Bearer ${token}`;
+    config.headers.Authorization = 'Bearer ' + token;
   }
   return config;
 });

@@ -23,7 +23,6 @@ import {
 const mainNav = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/workspaces', label: 'Workspaces', icon: Folder },
-  { path: '/search', label: 'Search', icon: Search },
   { path: '/chat', label: 'AI Chat', icon: MessageSquare },
   { path: '/analytics', label: 'Analytics', icon: BarChart3 },
 ];

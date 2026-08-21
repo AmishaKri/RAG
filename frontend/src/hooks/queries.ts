@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { authApi } from '@/api/auth';
 import { workspacesApi } from '@/api/workspaces';
 import { documentsApi } from '@/api/documents';
-import { searchApi } from '@/api/search';
 import { chatApi } from '@/api/chat';
 import { analyticsApi } from '@/api/analytics';
 import { User, Workspace, DocumentResponse, SearchResult, Conversation, Message, AnalyticsSummary } from '@/types';
@@ -85,16 +84,6 @@ export const useDeleteDocument = () => {
   });
 };
 
-export const useSearch = (workspaceId: string | undefined) => {
-  return useMutation<SearchResult[], unknown, { query: string; top_k?: number }>({
-    mutationFn: (params) =>
-      searchApi.hybrid({
-        query: params.query,
-        workspace_id: workspaceId!,
-        top_k: params.top_k ?? 5,
-      }),
-  });
-};
 
 export const useConversations = (workspaceId: string | undefined) =>
   useQuery<Conversation[]>({
@@ -131,8 +120,8 @@ export const useMessages = (conversationId: string | undefined) =>
 export const useAddMessage = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ conversationId, content }: { conversationId: string; content: string }) =>
-      chatApi.addMessage(conversationId, { content }),
+    mutationFn: ({ conversationId, content, role }: { conversationId: string; content: string; role?: 'user' | 'assistant' }) =>
+      chatApi.addMessage(conversationId, { content, role }),
     onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: ['messages', vars.conversationId] }),
   });
 };

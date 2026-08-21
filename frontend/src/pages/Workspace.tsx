@@ -18,7 +18,6 @@ import { Button } from '@/components/ui/Button';
 const tabs = [
   { path: '', label: 'Overview', icon: Folder },
   { path: 'documents', label: 'Documents', icon: FileText },
-  { path: 'search', label: 'Search', icon: Search },
   { path: 'chat', label: 'AI Chat', icon: MessageSquare },
   { path: 'analytics', label: 'Analytics', icon: BarChart3 },
 ];

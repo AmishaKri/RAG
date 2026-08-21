@@ -144,8 +144,8 @@ export default function Dashboard() {
             <CardDescription>Jump into key workflows</CardDescription>
           </CardHeader>
           <div className="space-y-2">
-            <QuickAction icon={Search} label="Search knowledge" onClick={() => activeWorkspace && navigate(`/workspace/${activeWorkspace.id}/search`)} />
             <QuickAction icon={MessageSquare} label="Ask AI" onClick={() => activeWorkspace && navigate(`/workspace/${activeWorkspace.id}/chat`)} />
+            <QuickAction icon={Folder} label="View workspaces" onClick={() => navigate('/workspaces')} />
             <QuickAction icon={Folder} label="View workspaces" onClick={() => navigate('/workspaces')} />
           </div>
         </Card>
