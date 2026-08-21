@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status, BackgroundTasks
 from app.db.mongodb import users
+from app.core.config import settings
 from app.schemas.user import (
     UserRegister,
     UserLogin,
@@ -112,5 +113,70 @@ class AuthService:
             )
 
         return {"message": "Password has been successfully reset. You can now login with your new password."}
+
+    @staticmethod
+    def google_login(token: str) -> dict:
+        if not settings.GOOGLE_CLIENT_ID:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Google login is not configured",
+            )
+
+        try:
+            import httpx
+            resp = httpx.get(
+                f"https://oauth2.googleapis.com/tokeninfo?id_token={token}",
+                timeout=10,
+            )
+            if resp.status_code != 200:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid Google token",
+                )
+
+            payload = resp.json()
+            if payload.get("aud") != settings.GOOGLE_CLIENT_ID:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid Google client ID",
+                )
+
+            if payload.get("iss") not in ("https://accounts.google.com", "accounts.google.com"):
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid token issuer",
+                )
+
+            email = payload["email"].lower()
+            name = payload.get("name", email.split("@")[0])
+            picture = payload.get("picture")
+
+            db_user = users.find_one({"email": email})
+            if not db_user:
+                new_user = {
+                    "name": name,
+                    "email": email,
+                    "password_hash": "",
+                    "picture": picture,
+                }
+                res = users.insert_one(new_user)
+                user_id = res.inserted_id
+            else:
+                user_id = db_user["_id"]
+                users.update_one(
+                    {"_id": user_id},
+                    {"$set": {"name": name, "picture": picture}},
+                )
+
+            access_token = create_access_token({"sub": str(user_id)})
+            return {"access_token": access_token, "token_type": "bearer"}
+
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Google login failed: {str(e)}",
+            )
 
 auth_service = AuthService()

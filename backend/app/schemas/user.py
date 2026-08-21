@@ -34,6 +34,10 @@ class UserLogin(BaseModel):
     password: str
 
 
+class GoogleLoginRequest(BaseModel):
+    token: str
+
+
 class UserResponse(BaseModel):
     id: str
     name: str
