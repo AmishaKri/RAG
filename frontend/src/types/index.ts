@@ -104,6 +104,7 @@ export interface Message {
 
 export interface MessageCreate {
   content: string;
+  role?: 'user' | 'assistant';
 }
 
 export interface FeedbackCreate {

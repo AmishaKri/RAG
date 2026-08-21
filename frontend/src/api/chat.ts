@@ -39,7 +39,10 @@ export const chatApi = {
 
   addMessage: async (conversationId: string, data: MessageCreate): Promise<Message> => {
     try {
-      const res = await client.post<Message>(`/chat/conversations/${conversationId}/messages`, data);
+      const res = await client.post<Message>(`/chat/conversations/${conversationId}/messages`, {
+        ...data,
+        role: data.role || 'user',
+      });
       return res.data;
     } catch (error) {
       throw handleApiError(error);
