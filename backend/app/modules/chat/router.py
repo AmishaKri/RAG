@@ -71,7 +71,7 @@ def send_message(
 ):
     return chat_service.add_message(
         conversation_id=conversation_id,
-        role="assistant",
+        role=payload.role,
         content=payload.content,
         citations=[],
     )

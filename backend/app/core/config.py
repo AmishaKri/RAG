@@ -33,6 +33,11 @@ class Settings(BaseSettings):
     RATE_LIMIT_DEFAULT: str = "60/minute"
     RATE_LIMIT_AUTH: str = "5/minute"
 
+    # RAG relevance threshold for deciding when retrieved chunks are strong enough
+    # to justify document-grounded answers. This is checked against the Qdrant
+    # hybrid-search score returned by Fusion RRF.
+    RAG_RELEVANCE_THRESHOLD: float = 0.5
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

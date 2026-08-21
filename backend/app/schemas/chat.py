@@ -13,6 +13,7 @@ class MessageBase(BaseModel):
 
 class MessageCreate(BaseModel):
     content: str
+    role: Literal["user", "assistant"] = "user"
 
 
 class MessageResponse(MessageBase):
