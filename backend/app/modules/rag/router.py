@@ -12,14 +12,33 @@ def ask_question(
         get_current_user_id
     ),
 ):
-
-    generator = rag_service.stream_answer(
+    # Retrieve contexts to include as a preamble in the stream so the frontend can show citations
+    contexts = rag_service.retrieve(
         query=payload.query,
         workspace_id=payload.workspace_id,
         owner_id=current_user_id,
+        top_k=5,
     )
 
+    def combined_generator():
+        # Emit a preamble with the top citations (as JSON) so clients can display them before streaming text
+        try:
+            import json
+            pre = json.dumps(contexts[:4])
+            yield f"CITATIONS:{pre}\n"
+        except Exception:
+            # ignore serialization errors and continue streaming
+            pass
+
+        # Now stream the actual answer (stream_answer will perform its own retrieve+decision)
+        for chunk in rag_service.stream_answer(
+            query=payload.query,
+            workspace_id=payload.workspace_id,
+            owner_id=current_user_id,
+        ):
+            yield chunk
+
     return StreamingResponse(
-        generator,
+        combined_generator(),
         media_type="text/plain",
     )

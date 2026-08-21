@@ -3,6 +3,8 @@ from qdrant_client.http import models
 from app.db.qdrant import qdrant_client
 from app.core.config import settings
 from app.modules.vector.embeddings import generate_dense_embeddings, generate_sparse_embeddings
+from app.core.logging import logger
+import math
 
 class VectorService:
     def __init__(self):
@@ -52,13 +54,22 @@ class VectorService:
         workspace_id: str,
         owner_id: str,
         top_k: int = 5,
+        score_threshold: float | None = None,
     ) -> list[dict]:
 
+        # Generate embeddings for the incoming query
         dense_query_vec = generate_dense_embeddings([query])[0]
 
         sparse_query_vec = list(
             generate_sparse_embeddings([query])
         )[0]
+
+        # Log basic diagnostics (lengths, a small sample of values)
+        try:
+            logger.info("embeddings_generated", query=query, dense_len=len(dense_query_vec), sparse_indices_len=len(getattr(sparse_query_vec, 'indices', [])), sparse_values_len=len(getattr(sparse_query_vec, 'values', [])), dense_head=[float(x) for x in dense_query_vec[:5]])
+        except Exception:
+            # keep safe; don't crash search if logging fails
+            pass
 
         search_filter = models.Filter(
             must=[
@@ -107,8 +118,11 @@ class VectorService:
 
         output = []
 
+        # Collect returned points and log small diagnostics about top scores
+        scores = []
         for point in results.points:
-
+            score = float(point.score) if point.score is not None else 0.0
+            scores.append(score)
             output.append({
                 "chunk_id": point.payload.get("chunk_id"),
                 "document_id": point.payload.get("document_id"),
@@ -116,8 +130,18 @@ class VectorService:
                 "owner_id": point.payload.get("owner_id"),
                 "text": point.payload.get("text"),
                 "chunk_index": point.payload.get("chunk_index"),
-                "score": point.score,
+                "score": score,
             })
+
+        try:
+            top_scores = scores[:5]
+            avg_score = sum(scores)/len(scores) if scores else 0.0
+            logger.info("qdrant_query_result", collection=self.collection_name, returned=len(scores), top_scores=top_scores, avg_score=round(avg_score,4) if not math.isfinite(avg_score) else round(avg_score,4))
+        except Exception:
+            pass
+
+        if score_threshold is not None:
+            output = [item for item in output if item.get("score", 0) >= score_threshold]
 
         return output
 
