@@ -30,8 +30,8 @@ def send_welcome_email(to_email: str, user_name: str):
 
 
 def send_password_reset_email(to_email: str, token: str):
-    # Frontend reset page  URL
-    reset_url = f"https://yourfrontend.com/reset-password?token={token}"
+    # Frontend reset page URL
+    reset_url = f"{settings.FRONTEND_URL.rstrip('/')}/reset-password?token={token}"
 
     message = MIMEMultipart("alternative")
     message["Subject"] = "Password Reset Request"
