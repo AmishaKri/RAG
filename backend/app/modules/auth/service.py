@@ -135,7 +135,7 @@ class AuthService:
                 )
 
             payload = resp.json()
-            if payload.get("aud") != settings.GOOGLE_CLIENT_ID:
+            if payload.get("aud") != settings.GOOGLE_CLIENT_ID.strip('"\''):
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Invalid Google client ID",

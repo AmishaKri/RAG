@@ -2,8 +2,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Plus, MessageSquare, Home, Settings, FileText, Folder, Sparkles } from 'lucide-react';
+import { Search, Plus, MessageSquare, Home, Settings, FileText, Folder, Sparkles, X } from 'lucide-react';
+import { toast } from 'sonner';
 import { useThemeStore } from '@/store/uiStore';
+import { useWorkspaceStore } from '@/store/workspaceStore';
 import { cn } from '@/lib/utils';
 
 interface Command {
@@ -17,18 +19,53 @@ export const CommandPalette = () => {
   const { commandOpen, setCommandOpen } = useThemeStore();
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
+  const { currentWorkspace } = useWorkspaceStore();
 
   const commands: Command[] = useMemo(
     () => [
       { id: 'home', label: 'Go to Dashboard', icon: Home, action: () => { navigate('/dashboard'); setCommandOpen(false); } },
       { id: 'workspaces', label: 'View Workspaces', icon: Folder, action: () => { navigate('/workspaces'); setCommandOpen(false); } },
       { id: 'new-workspace', label: 'Create Workspace', icon: Plus, action: () => { navigate('/workspaces'); setCommandOpen(false); } },
-      { id: 'upload', label: 'Upload Document', icon: FileText, action: () => { navigate('/workspaces'); setCommandOpen(false); } },
-      { id: 'chat', label: 'Start AI Chat', icon: MessageSquare, action: () => { navigate('/workspaces'); setCommandOpen(false); } },
-      { id: 'search', label: 'Search Knowledge', icon: Sparkles, action: () => { navigate('/workspaces'); setCommandOpen(false); } },
+      {
+        id: 'upload',
+        label: 'Upload Document',
+        icon: FileText,
+        action: () => {
+          if (currentWorkspace) {
+            navigate(`/workspace/${currentWorkspace.id}/documents`);
+          } else {
+            navigate('/workspaces');
+            toast.info('Please select a workspace first');
+          }
+          setCommandOpen(false);
+        },
+      },
+      {
+        id: 'chat',
+        label: 'Start AI Chat',
+        icon: MessageSquare,
+        action: () => {
+          if (currentWorkspace) {
+            navigate(`/workspace/${currentWorkspace.id}/chat`);
+          } else {
+            navigate('/workspaces');
+            toast.info('Please select a workspace first');
+          }
+          setCommandOpen(false);
+        },
+      },
+      {
+        id: 'search',
+        label: 'Search Knowledge',
+        icon: Sparkles,
+        action: () => {
+          setCommandOpen(false);
+          toast('Global knowledge search is coming soon');
+        },
+      },
       { id: 'settings', label: 'Open Settings', icon: Settings, action: () => { navigate('/settings'); setCommandOpen(false); } },
     ],
-    [navigate, setCommandOpen]
+    [navigate, setCommandOpen, currentWorkspace]
   );
 
   const filtered = useMemo(() => {
@@ -64,8 +101,12 @@ export const CommandPalette = () => {
             onClick={() => setCommandOpen(false)}
             className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
           />
-          <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-32">
+          <div
+            onClick={() => setCommandOpen(false)}
+            className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-32"
+          >
             <motion.div
+              onClick={(e) => e.stopPropagation()}
               initial={{ opacity: 0, y: -16, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -16, scale: 0.98 }}
@@ -81,7 +122,13 @@ export const CommandPalette = () => {
                   placeholder="Search commands, pages, or knowledge..."
                   className="flex-1 bg-transparent text-base text-[var(--text)] placeholder:text-[var(--text-2)] focus:outline-none"
                 />
-                <kbd className="hidden rounded border border-[var(--border)] bg-[var(--surface-2)] px-1.5 py-0.5 text-xs text-[var(--text-2)] md:inline">ESC</kbd>
+                <button
+                  onClick={() => setCommandOpen(false)}
+                  className="rounded p-1 text-[var(--text-2)] hover:bg-[var(--surface-2)] hover:text-[var(--text)]"
+                  aria-label="Close"
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
               <div className="max-h-80 overflow-y-auto p-2">
                 {filtered.length === 0 ? (

@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
 import {
   FileText,
   Folder,
@@ -81,7 +82,17 @@ export default function Dashboard() {
           <p className="mt-1 text-[var(--text-2)]">Here's what is happening across your knowledge.</p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Button onClick={() => activeWorkspace && navigate(`/workspace/${activeWorkspace.id}/documents`)}>
+          <Button
+            type="button"
+            onClick={() => {
+              if (activeWorkspace) {
+                setCurrentWorkspace(activeWorkspace);
+                navigate(`/workspace/${activeWorkspace.id}/documents`);
+              } else {
+                toast.info('Select or create a workspace first');
+              }
+            }}
+          >
             <Upload className="mr-2 h-4 w-4" /> Upload Document
           </Button>
           <Button variant="outline" onClick={() => navigate('/workspaces')}>

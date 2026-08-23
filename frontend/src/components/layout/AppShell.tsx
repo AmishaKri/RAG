@@ -5,10 +5,13 @@ import { CommandPalette } from '@/components/ui/CommandPalette';
 import { useEffect } from 'react';
 import { useWorkspaceStore } from '@/store/workspaceStore';
 import { useWorkspaces } from '@/hooks/queries';
+import { useThemeStore } from '@/store/uiStore';
+import { cn } from '@/lib/utils';
 
 export const AppShell = () => {
   const { data: workspaces } = useWorkspaces();
   const { currentWorkspace, setCurrentWorkspace } = useWorkspaceStore();
+  const { sidebarOpen } = useThemeStore();
   const location = useLocation();
 
   // Sync current workspace from URL where possible
@@ -24,9 +27,9 @@ export const AppShell = () => {
     <div className="min-h-screen bg-[var(--bg)]">
       <Sidebar />
       <MobileTopBar />
-      <div className="flex min-h-screen flex-col lg:pl-64">
+      <div className={cn('flex min-h-screen flex-col', sidebarOpen && 'lg:pl-64')}>
         <TopBar />
-        <main className="flex-1 p-4 lg:p-8">
+        <main className="mx-auto w-full max-w-[1440px] flex-1 p-4 lg:p-8">
           <Outlet />
         </main>
       </div>

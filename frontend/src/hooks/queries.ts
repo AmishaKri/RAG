@@ -4,7 +4,7 @@ import { workspacesApi } from '@/api/workspaces';
 import { documentsApi } from '@/api/documents';
 import { chatApi } from '@/api/chat';
 import { analyticsApi } from '@/api/analytics';
-import { User, Workspace, DocumentResponse, SearchResult, Conversation, Message, AnalyticsSummary } from '@/types';
+import { User, Workspace, DocumentResponse, Conversation, ConversationUpdate, Message, AnalyticsSummary } from '@/types';
 
 export const useCurrentUser = () =>
   useQuery<User>({
@@ -105,6 +105,14 @@ export const useDeleteConversation = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => chatApi.deleteConversation(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['conversations'] }),
+  });
+};
+
+export const useUpdateConversation = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: ConversationUpdate }) => chatApi.updateConversation(id, data),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['conversations'] }),
   });
 };

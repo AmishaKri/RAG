@@ -1,5 +1,5 @@
 import { client, handleApiError } from './client';
-import { Conversation, ConversationCreate, Message, MessageCreate, FeedbackCreate, FeedbackResponse, EvaluationRequest, EvaluationResponse } from '@/types';
+import { Conversation, ConversationCreate, ConversationUpdate, Message, MessageCreate, FeedbackCreate, FeedbackResponse, EvaluationRequest, EvaluationResponse } from '@/types';
 
 export const chatApi = {
   listConversations: async (workspaceId: string): Promise<Conversation[]> => {
@@ -14,6 +14,15 @@ export const chatApi = {
   createConversation: async (data: ConversationCreate): Promise<Conversation> => {
     try {
       const res = await client.post<Conversation>('/chat/conversations', data);
+      return res.data;
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
+  updateConversation: async (id: string, data: ConversationUpdate): Promise<Conversation> => {
+    try {
+      const res = await client.patch<Conversation>(`/chat/conversations/${id}`, data);
       return res.data;
     } catch (error) {
       throw handleApiError(error);
