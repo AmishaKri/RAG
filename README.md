@@ -166,11 +166,17 @@ You can replace the placeholder path with your actual video file when ready.
 Add your landing page, dashboard, chat interface, and answer screenshots here for a better presentation:
 
 ```md
-![Landing Page](./assets/landing-page.png)
-![Dashboard](./assets/dashboard.png)
-![Workspace](./assets/workspace.png)
-![Chat Response](./assets/chat-response.png)
-![Analytics](./assets/analytics.png)
+<img width="1909" height="915" alt="image" src="https://github.com/user-attachments/assets/184e5677-937c-4838-bcaf-ca24f49d940a" />
+<img width="1917" height="913" alt="image" src="https://github.com/user-attachments/assets/eef47750-8c27-443c-ab5b-f61bf719a54f" />
+<img width="1918" height="911" alt="image" src="https://github.com/user-attachments/assets/ab5bd61e-47c4-4cf3-b38d-ded4a9297836" />
+<img width="1917" height="914" alt="image" src="https://github.com/user-attachments/assets/4bfa23ea-e6fb-4da4-a032-1d4c899e00db" />
+<img width="1919" height="912" alt="image" src="https://github.com/user-attachments/assets/f92e9212-17cf-4924-9144-f28ee5af90ac" />
+<img width="1912" height="907" alt="image" src="https://github.com/user-attachments/assets/593241f4-ca4a-4796-86cd-67b3e300495b" />
+<img width="1919" height="898" alt="image" src="https://github.com/user-attachments/assets/8af537c3-6633-43fc-93ce-15306186fc1d" />
+<img width="1917" height="910" alt="image" src="https://github.com/user-attachments/assets/878b41e0-f132-4f38-8f2c-813398096af5" />
+<img width="1918" height="912" alt="image" src="https://github.com/user-attachments/assets/116c501f-7026-49b1-8fa8-16d07e6ca5bc" />
+<img width="1919" height="914" alt="image" src="https://github.com/user-attachments/assets/c75bbec5-d055-4db3-814b-42a2d0bc9438" />
+<img width="1919" height="921" alt="image" src="https://github.com/user-attachments/assets/f18e1ee4-0044-44b7-97d6-96644391efe1" />
 ```
 
 You can store these images in an `assets/` folder and update the paths accordingly.
