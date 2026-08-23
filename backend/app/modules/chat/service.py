@@ -44,6 +44,24 @@ class ChatService:
             result.append(doc)
         return result
 
+    def rename_conversation(self, conversation_id: str, user_id: str, title: str) -> dict:
+        if not ObjectId.is_valid(conversation_id):
+            raise HTTPException(status_code=400, detail="Invalid conversation ID")
+
+        now = datetime.now(timezone.utc)
+        doc = self.conversations.find_one_and_update(
+            {"_id": ObjectId(conversation_id), "user_id": ObjectId(user_id)},
+            {"$set": {"title": title, "updated_at": now}},
+            return_document=True,
+        )
+        if not doc:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+
+        doc["id"] = str(doc["_id"])
+        doc["user_id"] = str(doc["user_id"])
+        doc["workspace_id"] = str(doc["workspace_id"])
+        return doc
+
     def delete_conversation(self, conversation_id: str, user_id: str):
         if not ObjectId.is_valid(conversation_id):
             raise HTTPException(status_code=400, detail="Invalid conversation ID")

@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, status, Body
 from app.core.security import get_current_user
 from app.schemas.chat import (
     ConversationCreate,
+    ConversationUpdate,
     ConversationResponse,
     MessageCreate,
     MessageResponse,
@@ -47,6 +48,16 @@ def get_conversations(
         user_id=user_id,
         workspace_id=workspace_id,
     )
+
+
+@router.patch("/conversations/{conversation_id}", response_model=ConversationResponse)
+def update_conversation(
+    conversation_id: str,
+    payload: ConversationUpdate,
+    current_user: Any = Depends(get_current_user),
+):
+    user_id = extract_user_id(current_user)
+    return chat_service.rename_conversation(conversation_id, user_id, payload.title)
 
 
 @router.delete("/conversations/{conversation_id}", status_code=status.HTTP_204_NO_CONTENT)
