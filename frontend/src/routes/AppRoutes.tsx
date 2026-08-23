@@ -17,6 +17,7 @@ const Workspace = lazy(() => import('@/pages/Workspace'));
 const Documents = lazy(() => import('@/pages/Documents'));
 const Chat = lazy(() => import('@/pages/Chat'));
 const Analytics = lazy(() => import('@/pages/Analytics'));
+const WorkspaceOverview = lazy(() => import('@/pages/WorkspaceOverview'));
 const Settings = lazy(() => import('@/pages/Settings'));
 const Profile = lazy(() => import('@/pages/Profile'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
@@ -66,11 +67,4 @@ export default function AppRoutes() {
   );
 }
 
-function WorkspaceOverview() {
-  return (
-    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-12 text-center">
-      <h2 className="text-lg font-semibold text-[var(--text)]">Workspace overview</h2>
-      <p className="mt-1 text-sm text-[var(--text-2)]">Select a tab to view documents, search, chat, or analytics.</p>
-    </div>
-  );
-}
+

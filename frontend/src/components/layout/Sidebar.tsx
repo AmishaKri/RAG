@@ -10,7 +10,6 @@ import { useCurrentUser } from '@/hooks/queries';
 import {
   LayoutDashboard,
   Folder,
-  Search,
   MessageSquare,
   BarChart3,
   Settings,

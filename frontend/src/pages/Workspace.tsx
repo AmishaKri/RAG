@@ -4,11 +4,9 @@ import { motion } from 'framer-motion';
 import {
   Folder,
   FileText,
-  Search,
   MessageSquare,
   BarChart3,
   ChevronRight,
-  Upload,
 } from 'lucide-react';
 import { useWorkspace } from '@/hooks/queries';
 import { useWorkspaceStore } from '@/store/workspaceStore';
@@ -63,9 +61,7 @@ export default function Workspace() {
           <h1 className="text-2xl font-bold text-[var(--text)]">{workspace.name}</h1>
           <p className="mt-1 text-sm text-[var(--text-2)]">{workspace.description || 'No description'}</p>
         </div>
-        <Button onClick={() => navigate(`/workspace/${workspace.id}/documents`)}>
-          <Upload className="mr-2 h-4 w-4" /> Upload Document
-        </Button>
+
       </div>
 
       <div className="border-b border-[var(--border)]">

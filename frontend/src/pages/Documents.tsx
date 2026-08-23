@@ -34,32 +34,42 @@ export default function Documents() {
   const [progress, setProgress] = useState<number | null>(null);
   const [deleteDocId, setDeleteDocId] = useState<string | null>(null);
 
-  const onDrop = (files: FileList | null) => {
+  const onDrop = async (files: FileList | null) => {
     if (!workspaceId || !files?.length) return;
-    const file = files[0];
-    const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
-    if (!ALLOWED.includes(ext)) {
-      toast.error(`Unsupported file type: ${ext}. Allowed: ${ALLOWED.join(', ')}`);
-      return;
-    }
-    if (file.size > MAX_SIZE) {
-      toast.error('File too large. Maximum 20 MB.');
-      return;
-    }
-    setProgress(0);
-    upload.mutate(
-      { workspaceId, file, onProgress: setProgress },
-      {
-        onSuccess: () => {
-          toast.success('Document uploaded');
-          setProgress(null);
-        },
-        onError: (err: any) => {
-          toast.error(err.message || 'Upload failed');
-          setProgress(null);
-        },
+    const fileArray = Array.from(files);
+
+    for (const file of fileArray) {
+      const ext = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+      if (!ALLOWED.includes(ext)) {
+        toast.error(`Unsupported file type: ${ext}. Allowed: ${ALLOWED.join(', ')}`);
+        return;
       }
-    );
+      if (file.size > MAX_SIZE) {
+        toast.error(`File too large: ${file.name}. Maximum 20 MB.`);
+        return;
+      }
+    }
+
+    setProgress(0);
+    const total = fileArray.length;
+    let uploaded = 0;
+
+    try {
+      for (const [i, file] of fileArray.entries()) {
+        await upload.mutateAsync({
+          workspaceId,
+          file,
+          onProgress: (p: number) => setProgress(((i + p / 100) / total) * 100),
+        });
+        uploaded++;
+      }
+      toast.success(`${uploaded} document${uploaded === 1 ? '' : 's'} uploaded`);
+    } catch (err: any) {
+      toast.error(err.message || 'Upload failed');
+    } finally {
+      setProgress(null);
+      if (fileInput.current) fileInput.current.value = '';
+    }
   };
 
   const confirmDelete = async () => {
@@ -95,9 +105,10 @@ export default function Documents() {
         <input
           ref={fileInput}
           type="file"
+          multiple
           className="hidden"
           accept=".pdf,.docx,.txt,.csv"
-          onChange={(e) => onDrop(e.target.files)}
+          onChange={(e) => { onDrop(e.target.files); e.target.value = ''; }}
         />
       </Card>
 

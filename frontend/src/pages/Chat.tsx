@@ -9,6 +9,10 @@ import {
   FileText,
   Loader2,
   Sparkles,
+  Pencil,
+  Trash2,
+  X,
+  Check,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
@@ -18,6 +22,8 @@ import { Markdown } from '@/components/ui/Markdown';
 import {
   useConversations,
   useCreateConversation,
+  useDeleteConversation,
+  useUpdateConversation,
   useAddMessage,
   useMessages,
 } from '@/hooks/queries';
@@ -38,9 +44,13 @@ export default function Chat() {
   const { currentWorkspace } = useWorkspaceStore();
   const { data: conversations, isLoading: convsLoading } = useConversations(workspaceId);
   const createConversation = useCreateConversation();
+  const deleteConversation = useDeleteConversation();
+  const updateConversation = useUpdateConversation();
   const addMessage = useAddMessage();
 
   const [activeConv, setActiveConv] = useState<Conversation | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
   const { data: historyMessages } = useMessages(activeConv?.id);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -152,10 +162,34 @@ export default function Chat() {
     setThinking(false);
   };
 
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteConversation.mutateAsync(id);
+      if (activeConv?.id === id) {
+        setActiveConv(null);
+        setMessages([]);
+        setSources([]);
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Delete failed');
+    }
+  };
+
+  const handleRename = async (id: string) => {
+    if (!editTitle.trim()) return;
+    try {
+      await updateConversation.mutateAsync({ id, data: { title: editTitle.trim() } });
+      setEditingId(null);
+      setEditTitle('');
+    } catch (err: any) {
+      toast.error(err.message || 'Rename failed');
+    }
+  };
+
   return (
-    <div className="grid h-[calc(100vh-220px)] grid-cols-1 gap-6 lg:grid-cols-12">
+    <div className="grid h-[calc(100vh-260px)] min-h-0 grid-cols-1 items-start gap-6 lg:grid-cols-12">
       {/* Conversation list */}
-      <div className="hidden flex-col gap-3 lg:col-span-3 lg:flex">
+      <div className="hidden min-h-0 flex-col gap-3 lg:col-span-3 lg:flex">
         <Button onClick={handleNewChat} className="w-full" variant="outline">
           <Plus className="mr-2 h-4 w-4" /> New Chat
         </Button>
@@ -164,29 +198,66 @@ export default function Chat() {
         ) : !conversations?.length ? (
           <div className="mt-4 text-center text-sm text-[var(--text-2)]">No conversations yet.</div>
         ) : (
-          <div className="flex-1 space-y-2 overflow-y-auto pr-1">
+          <div className="max-h-[calc(100vh-330px)] space-y-2 overflow-y-auto pr-1">
             {conversations.map((conv) => (
-              <button
+              <div
                 key={conv.id}
-                onClick={() => { setActiveConv(conv); setSources([]); }}
                 className={[
-                  'w-full rounded-xl border px-4 py-3 text-left text-sm transition-all',
+                  'group relative w-full rounded-xl border px-4 py-3 text-left text-sm transition-all',
                   activeConv?.id === conv.id
                     ? 'border-forge-500 bg-forge-50 dark:bg-forge-900/20'
                     : 'border-[var(--border)] bg-[var(--surface)] text-[var(--text)] hover:border-forge-400',
                 ].join(' ')}
               >
-                <p className="font-medium line-clamp-1">{conv.title}</p>
-                <p className="mt-1 text-xs text-[var(--text-2)]">{formatDate(conv.updated_at)}</p>
-              </button>
+                {editingId === conv.id ? (
+                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    <input
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') handleRename(conv.id); }}
+                      className="flex-1 rounded border border-forge-400 bg-[var(--bg)] px-2 py-1 text-xs text-[var(--text)] focus:outline-none"
+                      autoFocus
+                    />
+                    <button onClick={() => handleRename(conv.id)} className="text-mint-500 hover:text-mint-600">
+                      <Check className="h-4 w-4" />
+                    </button>
+                    <button onClick={() => { setEditingId(null); setEditTitle(''); }} className="text-rose-500 hover:text-rose-600">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex cursor-pointer items-center justify-between" onClick={() => { setActiveConv(conv); setSources([]); }}>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium line-clamp-1">{conv.title}</p>
+                      <p className="mt-1 text-xs text-[var(--text-2)]">{formatDate(conv.updated_at)}</p>
+                    </div>
+                    <div className="ml-2 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setEditingId(conv.id); setEditTitle(conv.title); }}
+                        className="rounded p-1 text-[var(--text-2)] hover:bg-[var(--bg)] hover:text-forge-500"
+                        title="Rename"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleDelete(conv.id); }}
+                        className="rounded p-1 text-[var(--text-2)] hover:bg-[var(--bg)] hover:text-rose-500"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         )}
       </div>
 
       {/* Chat center */}
-      <div className="flex flex-col lg:col-span-6">
-        <div className="flex-1 overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
+      <div className="flex min-h-0 flex-col self-stretch lg:col-span-6">
+        <div className="flex-1 min-h-0 overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-4">
           {messages.length === 0 && !thinking && !streaming && (
             <EmptyState
               icon={MessageSquare}
@@ -263,8 +334,8 @@ export default function Chat() {
       </div>
 
       {/* Sources */}
-      <div className="hidden flex-col gap-4 lg:col-span-3 lg:flex">
-        <Card className="h-full overflow-y-auto">
+      <div className="hidden min-h-0 flex-col self-stretch gap-4 lg:col-span-3 lg:flex">
+        <Card className="h-full min-h-0 overflow-y-auto">
           <h3 className="mb-4 text-sm font-semibold text-[var(--text)]">Sources</h3>
           {sources.length === 0 ? (
             <p className="text-sm text-[var(--text-2)]">Sources will appear after you ask a question.</p>

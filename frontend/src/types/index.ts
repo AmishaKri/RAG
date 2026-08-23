@@ -92,6 +92,10 @@ export interface ConversationCreate {
   title?: string;
 }
 
+export interface ConversationUpdate {
+  title: string;
+}
+
 export interface Message {
   id: string;
   conversation_id: string;

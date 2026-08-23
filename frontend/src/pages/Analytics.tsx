@@ -29,7 +29,6 @@ export default function Analytics() {
     return {
       documents: documents?.length || summary?.documents || 0,
       chunks: documents?.reduce((a, d) => a + d.chunk_count, 0) || summary?.chunks || 0,
-      searches: summary?.searches || 0,
       questions: summary?.questions || 0,
       conversations: conversations?.length || summary?.conversations || 0,
     };
@@ -63,7 +62,7 @@ export default function Analytics() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard icon={FileText} label="Documents" value={stats.documents} />
         <MetricCard icon={Layers} label="Chunks" value={stats.chunks} />
-        <MetricCard icon={Search} label="Searches" value={stats.searches} />
+        <MetricCard icon={Search} label="Questions" value={stats.questions} />
         <MetricCard icon={MessageSquare} label="Conversations" value={stats.conversations} />
       </div>
 
@@ -90,7 +89,7 @@ export default function Analytics() {
         </Card>
 
         <Card>
-          <h3 className="mb-4 text-sm font-semibold text-[var(--text)]">Search activity</h3>
+          <h3 className="mb-4 text-sm font-semibold text-[var(--text)]">Conversations over time</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={summary.searchesOverTime}>
@@ -116,7 +115,7 @@ export default function Analytics() {
                 </div>
                 <p className="text-sm font-medium text-[var(--text)]">{d.filename}</p>
               </div>
-              <p className="text-sm text-[var(--text-2)]">{d.views} views</p>
+              <p className="text-sm text-[var(--text-2)]">{d.views} chunks</p>
             </div>
           ))}
         </div>
