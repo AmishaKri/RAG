@@ -9,15 +9,15 @@ Built for modern teams who work with large amounts of technical, legal, product,
 This project was created by a 3-member team:
 
 - Member 1:
-  Samir Kumar — AI Integration
+  Samir Kumar — AI Integration, 
   Email Id: samirkr0802@gmail.com
 
 - Member 2:
-  Akriti Anchal — Frontend Development / UI Design
+  Akriti Anchal — Frontend Development / UI Design,
   Email Id: akritiaanchal@gmail.com
   
 - Member 3: 
-  Amisha Kumari — Backend Development
+  Amisha Kumari — Backend Development,
   Email Id: amishagwp123@gmail.com
 
 You can replace these names with your real team members as needed.
